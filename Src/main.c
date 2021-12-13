@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include "bsp.h"
 
+#if 0
 int main(void) {
 	BSP_init();
 	while (1) {
@@ -26,5 +27,40 @@ int main(void) {
 		BSP_delay(BSP_TICKS_PER_SEC / 4U);
 		BSP_ledGreenOff();
 		BSP_delay(BSP_TICKS_PER_SEC * 3U / 4U);
+	}
+}
+#endif
+
+int main(void) {
+	BSP_init();
+	while (1) {
+		static enum {
+			INITIAL, OFF_STATE, ON_STATE
+		} state = INITIAL;
+		static uint32_t start;
+
+		switch (state) {
+		case INITIAL:
+			start = BSP_tickCntr();
+			state = OFF_STATE;
+			break;
+		case OFF_STATE:
+			if ((BSP_tickCntr() - start) > (BSP_TICKS_PER_SEC * 3U / 4U)) {
+				BSP_ledYellowOn();
+				start = BSP_tickCntr();
+				state = ON_STATE;
+			}
+			break;
+		case ON_STATE:
+			if ((BSP_tickCntr() - start) > (BSP_TICKS_PER_SEC / 4U)) {
+				BSP_ledYellowOff();
+				start = BSP_tickCntr();
+				state = OFF_STATE;
+			}
+			break;
+		default:
+			// error processing???
+			break;
+		}
 	}
 }
