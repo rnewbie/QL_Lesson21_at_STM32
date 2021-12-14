@@ -19,9 +19,7 @@
 #include <stdint.h>
 #include "bsp.h"
 
-#if 0
-int main(void) {
-	BSP_init();
+void main_blinky1(void) {
 	while (1) {
 		BSP_ledGreenOn();
 		BSP_delay(BSP_TICKS_PER_SEC / 4U);
@@ -29,38 +27,23 @@ int main(void) {
 		BSP_delay(BSP_TICKS_PER_SEC * 3U / 4U);
 	}
 }
-#endif
+
+void main_blinky2(void) {
+	while (1) {
+		BSP_ledBlueOn();
+		BSP_delay(BSP_TICKS_PER_SEC / 2U);
+		BSP_ledBlueOff();
+		BSP_delay(BSP_TICKS_PER_SEC / 3U);
+	}
+}
 
 int main(void) {
-	BSP_init();
-	while (1) {
-		static enum {
-			INITIAL, OFF_STATE, ON_STATE
-		} state = INITIAL;
-		static uint32_t start;
+	uint32_t volatile run = 0U;
 
-		switch (state) {
-		case INITIAL:
-			start = BSP_tickCntr();
-			state = OFF_STATE;
-			break;
-		case OFF_STATE:
-			if ((BSP_tickCntr() - start) > (BSP_TICKS_PER_SEC * 3U / 4U)) {
-				BSP_ledYellowOn();
-				start = BSP_tickCntr();
-				state = ON_STATE;
-			}
-			break;
-		case ON_STATE:
-			if ((BSP_tickCntr() - start) > (BSP_TICKS_PER_SEC / 4U)) {
-				BSP_ledYellowOff();
-				start = BSP_tickCntr();
-				state = OFF_STATE;
-			}
-			break;
-		default:
-			// error processing???
-			break;
-		}
+	BSP_init();
+	if (run) {
+		main_blinky1();
+	} else {
+		main_blinky2();
 	}
 }
